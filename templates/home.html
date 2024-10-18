@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to TestGenie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="homepage">
+        <h1>Welcome to TestGenie!</h1>
+        <p>Let's build amazing tables together. Click the button below to get started!</p>
+        <button id="startButton">Get Started</button>
+    </div>
+
+    <script>
+        document.getElementById('startButton').onclick = function() {
+            window.location.href = '/index'; // Make sure to redirect to the correct route
+        };
+    </script>
+</body>
+</html>
