@@ -36,21 +36,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function updateButtonOrder(tableId) {
-    let tableContainer = document.getElementById(`table-container-${tableId}`);
-    let buttonsContainer = tableContainer.querySelector('.buttons-container');
-    
-    // Check if the "Add Relationships" button needs to be moved
-    let addRelationshipsButton = buttonsContainer.querySelector('button[data-action="addRelationships"]');
-    if (addRelationshipsButton) {
-        // Temporarily remove the "Add Relationships" button
-        addRelationshipsButton.remove();
-        // Re-append it to ensure it's the last button
-        buttonsContainer.appendChild(addRelationshipsButton);
-    }
+
+
+function exportResults() {
+    // Implement this function
+
+    // this function will return data in all parent tables
+    let tableData = readTableData(tableId);
+
+    // you should be able to get result table data by hacking into this object 'resultTableContainer' 
+    // addResultTable(data) adds the result table for display, and could be helpful
 }
-
-
 
 function resetTable(tableId) {
 
@@ -69,10 +65,12 @@ function resetTable(tableId) {
     let header = table.createTHead();
     let row = header.insertRow(0);
 
+    types = ['Complex String I', 'Category I', 'Number', 'Date'];
+
     for (let i = 1; i <= 4; i++) {
         let headerCell = row.insertCell(-1);
         headerCell.dataset.tableId = tableId;
-        let dropdown = createTypeDropdown(i, tableId); 
+        let dropdown = createTypeDropdown(tableId, types[i-1]); 
         headerCell.appendChild(dropdown);
         headerCell.ondblclick = togglePrimaryKey; 
         headerCell.classList.add('header-cell');
@@ -82,13 +80,34 @@ function resetTable(tableId) {
     createTableButtons(tableId, tableContainer);
 
     // Reset column type and add a new random row
-    columnTypesByTableId[tableId] = ['String', 'String', 'String', 'String']
+    columnTypesByTableId[tableId] = ['Complex String I', 'Category I', 'Number', 'Date'];
     addRow(tableId);
 
 }
 
+function clearButtonsUponRelationshipAdded() {
+    // Find all button containers and hide them
+    let buttonContainers = document.querySelectorAll('.buttons-container');
+    buttonContainers.forEach(function(container) {
+        // Hide each container
+        container.style.display = 'none';
+    });
+
+    let allTables = document.querySelectorAll('.dynamic-table');
+    allTables.forEach(table => {
+
+        createTableHeaders(table); // Use the current headers or retrieve them from somewhere
+
+
+        let allCells = table.querySelectorAll('td', 'th');
+        allCells.forEach(cell => {
+            cell.classList.add('non-editable');
+        });
+    });
+}
 
 function sendRelationshipRequest() {
+    clearButtonsUponRelationshipAdded();
     let userInput = document.getElementById('relationReq').value;
     let tableData = readTableData();  
 
@@ -120,12 +139,9 @@ function sendRelationshipRequest() {
             } catch (error) {
                 console.error('Parsing error:', error);
             }
-        }
-
-        if (data.result && data.result.rows) {
-
-            console.log('New relationship table:', data.result);
-
+        } else if (data.result && data.result.rows) {
+            console.log('Inside of adding relationship. JSON. ')
+            addResultTable(data.result);
         }
         document.getElementById('addRelationPopup').style.display = 'none';  // Hide the popup
     })
@@ -179,10 +195,13 @@ function addResultTable(data) {
     let addRelationshipsButton = createAddRelationshipsButton();  // Assuming this function already exists
     resultContainer.appendChild(addRelationshipsButton);
 
+    // Create and append the "Export Results" button
+    let exportResultButton = createControlButton('Export', () => exportResults, 'export'); 
+    resultContainer.appendChild(exportResultButton);
+
     // Append the result table container to the main container in your document
     document.getElementById('mainContainer').appendChild(resultContainer);
 }
-
 
 
 
@@ -192,6 +211,9 @@ function sendCustomizationRequest() {
     let userInput = document.getElementById('customReq').value;
     let tableData = readTableData(tableId);
     
+
+    console.log('check ID: ', tableId);
+
     fetch('/analyze', {
         method: 'POST',
         headers: {
@@ -218,35 +240,39 @@ function sendCustomizationRequest() {
             try {
                 data.result = JSON.parse(cleanString);
                 console.log('Parsed data.result:', data.result);
+                console.log('check rows', data.result.rows)
                 // Continue with applying changes to the table
                 if (data.result && data.result.rows) {
+                    console.log('inside try');
                     applyChangesToTable(data.result, tableId);
                 }
             } catch (error) {
                 console.error('Parsing error:', error);
             }
-        }
-    
-    
-        // Continue with applying changes to the table
-        if (data.result && data.result.rows) {
+        } else if (data.result && data.result.rows){
+            // If the returned is already in JSON format
             applyChangesToTable(data.result, tableId);
         }
+
     })
     .catch(error => console.error('Error:', error))
     .finally(() => {
         // This will execute after either the .then() or .catch() finishes
+
+        console.log('finally');
         document.getElementById('customizePopup').style.display = 'none'; // Hide the popup
     });
 }
 
 function readTableData(tableId = null) {
     let allTablesData = {};
-
     let allTables = document.querySelectorAll('.dynamic-table');
-    allTables.forEach((table, index) =>{
-        let tableName = (tableId !== null && index === parseInt(tableId, 10)) ? 'CURRENT Table' : 'Table ' + (index+1);
-        
+
+    // Grab data from the specified table if tableId is given, customization
+    if (tableId !== null) {
+        let tableIndex = parseInt(tableId, 10);
+        let table = allTables[tableIndex];
+        let tableName = 'CURRENT Table';
         let tableData = {
             columns: [],
             rows: [],
@@ -266,10 +292,38 @@ function readTableData(tableId = null) {
             }
             tableData.rows.push(rowData);
         }
-
         allTablesData[tableName] = tableData;
-    });
+    } 
 
+    // Grab data from all tables if no specified table, add relationship
+    else {
+        allTables.forEach((table, index) =>{
+
+            let tableName = 'Table ' + (index+1);
+            
+            let tableData = {
+                columns: [],
+                rows: [],
+                primaryKeyColumns: primaryKeyColumnsByTableId[tableId] || [],
+            };
+        
+            let headerCells = table.rows[0].cells;
+            for (let i = 0; i < headerCells.length; i++) {
+                tableData.columns.push(headerCells[i].innerText || `Column ${i+1}`);
+            }
+
+            for (let i = 1; i < table.rows.length; i++) {
+                let row = table.rows[i];
+                let rowData = [];
+                for (let j = 0; j < row.cells.length; j++) {
+                    rowData.push(row.cells[j].innerText);
+                }
+                tableData.rows.push(rowData);
+            }
+
+            allTablesData[tableName] = tableData;
+        });
+    };
     return allTablesData;
 
 }
@@ -325,9 +379,13 @@ function updateTableButtons(tableId) {
     if (buttonsContainer) {
         let addRowButton = buttonsContainer.querySelector('button[data-action="addRow"]');
         let addColumnButton = buttonsContainer.querySelector('button[data-action="addColumn"]');
+        let removeRowButton = buttonsContainer.querySelector('button[data-action="removeRow"]');
+        let removeColumnButton = buttonsContainer.querySelector('button[data-action="removeColumn"]');
 
         addRowButton?.remove();
         addColumnButton?.remove();
+        removeRowButton?.remove();
+        removeColumnButton?.remove();
 
         // Add "Reset" button if it's not already present
         if (!buttonsContainer.querySelector('button[data-action="reset"]')) {
@@ -429,28 +487,7 @@ function togglePrimaryKey(e) {
 
 function createAddRelationshipsButton() {
     let addRelationshipsButton = createControlButton('Add Relationships', () => {
-        // Find all button containers and hide them
-        let buttonContainers = document.querySelectorAll('.buttons-container');
-        buttonContainers.forEach(function(container) {
-            // Hide each container
-            container.style.display = 'none';
-        });
-
-        let allTables = document.querySelectorAll('.dynamic-table');
-        allTables.forEach(table => {
-
-            createTableHeaders(table); // Use the current headers or retrieve them from somewhere
-
-
-            let allCells = table.querySelectorAll('td', 'th');
-            allCells.forEach(cell => {
-                cell.classList.add('non-editable');
-            });
-        });
-
         showAddRelationPopup();
-
-        // This might involve changing the UI or setting certain flags
     }, 'addRelationships');
 
     addRelationshipsButton.classList.add('add-relationships-button')
@@ -501,7 +538,7 @@ function initializeTable(tableId) {
     tableContainer.className = 'table-container';
     tableContainer.id = tableContainerId; // Use constructed ID
 
-    columnTypesByTableId[tableId] = ['String', 'String', 'String', 'String'];
+    columnTypesByTableId[tableId] = ['Complex String I', 'Category I', 'Number', 'Date'];
     
     let tableIdActual = tableId;
     let table = document.createElement('table');
@@ -513,7 +550,7 @@ function initializeTable(tableId) {
 
     for (let i = 1; i <= 4; i++) {
         let headerCell = row.insertCell(-1);
-        let dropdown = createTypeDropdown(i, tableIdActual); // Assume this function is defined elsewhere
+        let dropdown = createTypeDropdown(tableId, columnTypesByTableId[tableId][i-1]); 
         headerCell.appendChild(dropdown);
         headerCell.dataset.tableId = tableIdActual;
         headerCell.ondblclick = togglePrimaryKey; // Assume this function is adjusted to work with the new structure
@@ -535,25 +572,33 @@ function initializeTable(tableId) {
 function createTableButtons(tableId, tableContainer) {
 
     let buttonsContainer = document.createElement('div');
-    buttonsContainer.className = 'buttons-container'; // This class will be used in the CSS to align the buttons
+    buttonsContainer.className = 'buttons-container'; 
 
-    // Create and append the "Add Row" button
+    // Add Row button
     let addRowButton = createControlButton('Add Row', () => addRow(tableId), 'addRow');
     buttonsContainer.appendChild(addRowButton);
 
-    // Create and append the "Add Column" button
+    // Add Column button
     let addColumnButton = createControlButton('Add Column', () => addColumn(tableId), 'addColumn');
     buttonsContainer.appendChild(addColumnButton);
 
-    // Create and append the "Customize" button
+    // Add Remove Row button
+    let removeRowButton = createControlButton('Remove Last Row', () => removeLastRow(tableId), 'removeRow');
+    buttonsContainer.appendChild(removeRowButton);
+
+    // Add Remove Column button
+    let removeColumnButton = createControlButton('Remove Last Column', () => removeLastColumn(tableId), 'removeColumn');
+    buttonsContainer.appendChild(removeColumnButton);
+
+    // Customize button
     let customizeButton = createControlButton('Customize', () => showCustomizePopup(tableId), 'customize');
     buttonsContainer.appendChild(customizeButton);
 
-    // Create and append the "Add Table" button
+    // Add Table button
     let addTableButton = createControlButton('Add Table', () => addTable(tableId), 'addTable');
     buttonsContainer.appendChild(addTableButton);
 
-    
+
     if (parseInt(tableId, 10) === tableCounter) {
         let addRelationshipsButton = createAddRelationshipsButton();
         buttonsContainer.appendChild(addRelationshipsButton);
@@ -634,10 +679,28 @@ function addRow(tableId) {
     }
 }
 
+// Function to remove the last row of the table
+function removeLastRow(tableId) {
+    let table = document.getElementById(tableId);
+    if (!table || table.rows.length <= 1) {
+        console.warn("No rows to remove");
+        return; // Skip if there are no rows or only the header row
+    }
+
+    table.deleteRow(table.rows.length - 1); // Delete the last row
+}
 
 // Utility function to generate data based on type
 function generateDataByType(type) {
     switch (type) {
+        case 'Complex String I':
+            return generatecolumn1(5, 7);
+        case 'Complex String II':
+            return generatecolumn2();
+        case 'Category I':
+            return getRandomCategory();        
+        case 'Category II':
+            return getRandomType();
         case 'String':
             return generateRandomString(1);
         case 'Number':
@@ -660,7 +723,7 @@ function addColumn(tableId) {
     //newHeaderCell.innerHTML = `col${headerRow.cells.length + 1}`;
     newHeaderCell.ondblclick = togglePrimaryKey;
 
-    let dropdown = createTypeDropdown(headerRow.cells.length);
+    let dropdown = createTypeDropdown(tableId);
     dropdown.dataset.tableId = tableId; // Make sure to set the data-tableId attribute
     dropdown.onchange = changeFieldType; 
     newHeaderCell.appendChild(dropdown);
@@ -672,6 +735,64 @@ function addColumn(tableId) {
         let newRowCell = table.rows[i].insertCell(-1);
         newRowCell.innerHTML = generateDataByType(columnTypesByTableId[tableId][headerRow.cells.length - 1]);
     }
+}
+
+// Function to remove the last column of the table
+function removeLastColumn(tableId) {
+    let table = document.getElementById(tableId);
+    if (!table || table.rows[0].cells.length <= 1) {
+        console.warn("No columns to remove");
+        return; // Skip if there are no columns to remove
+    }
+
+    // Remove the last cell from each row (including the header row)
+    for (let i = 0; i < table.rows.length; i++) {
+        table.rows[i].deleteCell(-1);
+    }
+
+    // Update the columnTypesByTableId array to reflect the removal
+    columnIndex = columnTypesByTableId[tableId].pop(); // Remove the last column type
+
+    // 
+    if (primaryKeyColumnsByTableId[tableId] && columnIndex === primaryKeyColumnsByTableId[tableId][-1]) {
+        primaryKeyColumnsByTableId[tableId].pop();
+    }
+}
+
+
+function generatecolumn1(minLength, maxLength) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+    let result = '';
+
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    return result;
+}
+
+function generatecolumn2() {
+    function segment(length) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+    return `${segment(6)}-${segment(6)}-${segment(2)}-${segment(2)}`;
+}
+
+
+function getRandomCategory() {
+    const categories = ['Category A', 'Category B', 'Category C', 'Category D'];
+    return categories[Math.floor(Math.random() * categories.length)];
+}
+
+function getRandomType() {
+    const categories = ['Type I', 'Type II', 'Type III', 'Type IV', 'Type V', 'Type VI'];
+    return categories[Math.floor(Math.random() * categories.length)];
 }
 
 function generateRandomString(length) {
@@ -697,18 +818,23 @@ function generateRandomDate() {
 }
 
 
-function createTypeDropdown(columnNumber, tableId) {
+function createTypeDropdown(tableId, Dtype=null) {
     const select = document.createElement('select');
     select.dataset.tableId = tableId;
 
-    const types = ['String', 'Number', 'Date']; // Add more types as needed
+    const types = ['Complex String I', 'Complex String II', 'Category I', 'Category II', 'String', 'Number', 'Date']; // Add more types as needed
     types.forEach(type => {
         const option = document.createElement('option');
         option.value = type;
         option.text = type;
         select.appendChild(option);
     });
-    select.value = 'String';
+
+    if (Dtype === null) {
+        select.value = 'String';
+    } else {
+        select.value = Dtype;
+    }
     select.onchange = changeFieldType; // Function to handle type change
 
     return select;
@@ -719,6 +845,7 @@ function changeFieldType(e) {
     // Get the index of the changed column
     let columnIndex = e.target.parentElement.cellIndex;
     let tableId = e.target.dataset.tableId;
+    console.log('check ID: ', tableId);
     let table = document.getElementById(tableId);
     let newType = e.target.value;
 
@@ -732,6 +859,18 @@ function changeFieldType(e) {
     for (let i = 1; i < table.rows.length; i++) {
         let cell = table.rows[i].cells[columnIndex];
         switch (newType) {
+            case 'Complex String I':
+                cell.innerHTML = generatecolumn1(5,7)
+                break;
+            case 'Complex String II':
+                cell.innerHTML = generatecolumn2();
+                break;
+            case 'Category I':
+                cell.innerHTML = getRandomCategory();
+                break;
+            case 'Category II':
+                cell.innerHTML = getRandomType();
+                break;
             case 'String':
                 cell.innerHTML = generateRandomString(1);
                 break;
