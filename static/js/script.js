@@ -74,7 +74,11 @@ function resetTable(tableId) {
         headerCell.dataset.tableId = tableId;
         let dropdown = createTypeDropdown(tableId, types[i-1]); 
         headerCell.appendChild(dropdown);
-        headerCell.ondblclick = togglePrimaryKey; 
+        headerCell.ondblclick = function(e) {
+            if (e.target === headerCell) {
+                togglePrimaryKey(e);  // Pass the event object to togglePrimaryKey
+            }
+        };
         headerCell.classList.add('header-cell');
     }
 
@@ -555,7 +559,12 @@ function initializeTable(tableId) {
         let dropdown = createTypeDropdown(tableId, columnTypesByTableId[tableId][i-1]); 
         headerCell.appendChild(dropdown);
         headerCell.dataset.tableId = tableIdActual;
-        headerCell.ondblclick = togglePrimaryKey; // Assume this function is adjusted to work with the new structure
+        headerCell.ondblclick = function(e) {
+            // Check if the double-clicked element is the headerCell itself and not the dropdown
+            if (e.target === headerCell) {
+                togglePrimaryKey(e);
+            }
+        };
         headerCell.classList.add('header-cell');
     }
 
@@ -716,6 +725,8 @@ function generateDataByType(type) {
 
 
 function addColumn(tableId) {
+
+    console.log('addColumn', tableId);
     let table = document.getElementById(tableId); 
     if (!table) return;
 
@@ -723,12 +734,17 @@ function addColumn(tableId) {
     let headerRow = table.rows[0];
     let newHeaderCell = headerRow.insertCell(-1);
     //newHeaderCell.innerHTML = `col${headerRow.cells.length + 1}`;
-    newHeaderCell.ondblclick = togglePrimaryKey;
+    newHeaderCell.ondblclick = function(e) {
+        // Check if the double-clicked element is the headerCell itself and not the dropdown
+        if (e.target === newHeaderCell) {
+            togglePrimaryKey(e);
+        }
+    };
 
     let dropdown = createTypeDropdown(tableId);
-    dropdown.dataset.tableId = tableId; // Make sure to set the data-tableId attribute
     dropdown.onchange = changeFieldType; 
     newHeaderCell.appendChild(dropdown);
+    newHeaderCell.dataset.tableId = tableId;
 
     columnTypesByTableId[tableId].push('String');
 
@@ -755,10 +771,15 @@ function removeLastColumn(tableId) {
     // Update the columnTypesByTableId array to reflect the removal
     columnIndex = columnTypesByTableId[tableId].pop(); // Remove the last column type
 
-    // 
-    if (primaryKeyColumnsByTableId[tableId] && columnIndex === primaryKeyColumnsByTableId[tableId][-1]) {
-        primaryKeyColumnsByTableId[tableId].pop();
+    console.log('Check columnIndex: ', columnIndex);
+    console.log('Check original primary key array: ', primaryKeyColumnsByTableId[tableId]);
+    
+    // Remove the column index from the primary key array
+    if (primaryKeyColumnsByTableId[tableId]) {
+        primaryKeyColumnsByTableId[tableId] = primaryKeyColumnsByTableId[tableId].filter(index => index !== columnIndex);
     }
+
+    console.log('Check new primary key array: ', primaryKeyColumnsByTableId[tableId]);
 }
 
 
