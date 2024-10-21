@@ -2,7 +2,7 @@
 /* General Styles */
 * {
     box-sizing: border-box;
-    margin: 0;
+    margin-bottom: 0;
     padding: 0;
 }
 
@@ -10,16 +10,173 @@
 body {
     font-family: 'Arial', sans-serif;
     background-color: #fbfcfd; /* Soft background color */
-    color: #2d603f;
+    color: #124f27;  /*#2d603f */
 }
 
 
-/* Header */
+/* Header
 h1 {
     text-align: center;
     margin: 20px 0;
-    color: #4CAF50; /* Header color */
+    color: #4CAF50; 
     font-size: 2.5em;
+} */
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #ddd;
+}
+
+header .title-container {
+    flex-grow: 1;
+    text-align: center; /* Centers the title */
+}
+
+h1 {
+    margin: 0;
+    font-size: 35px;
+    color: #127315;
+}
+
+/* Top-right links */
+.top-right-links {
+    display: flex;
+    gap: 15px; /* Adds space between the links */
+}
+
+.top-right-links a {
+    text-decoration: none;
+    color: #101110;
+    font-size: 16px;
+    padding: 5px 10px;
+
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.top-right-links a:hover {
+    background-color: #151715;
+    color: #fff;
+}
+
+/* Basic content styling */
+.about-section, .contributors-section {
+    padding: 20px;
+    margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+ /* About Section Styles */
+ .about-section {
+    background-color: #f9f9f9; /* Light gray background for About section */
+    color: #333; /* Dark gray text for About section */
+    padding: 20px; /* Padding for the section */
+    margin: 20px 0; /* Margin for spacing */
+    border-radius: 8px; /* Rounded corners */
+}
+
+.about-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #0c0d0d;
+    font-family: 'Roboto', sans-serif;
+}
+
+.about-section p {
+    font-size: 1.125rem;
+    color: #555;
+    text-align: justify;
+}
+
+.about-section strong {
+    color: #095c1a; /* Highlight important text with a distinct color */
+}
+
+.about-section p strong {
+    display: inline-block;
+    padding: 0 5px;
+    border-radius: 3px;
+}
+
+.about-section p em {
+    font-style: italic;
+    color: #666;
+}
+
+.about-section p {
+    margin-bottom: 1.5em; /* Add space between paragraphs */
+}
+
+/* Emoji styling */
+.about-section p .emoji {
+    font-size: 1.5rem;
+    margin-right: 8px;
+}
+
+  /* Text-specific icon effects
+  .about-section p::before {
+    content: '';
+    display: block;
+    height: 2px;
+    width: 50px;
+    background-color: #ff6b6b;
+    margin: 20px auto;
+} */
+
+
+/* Contributors Section Styles */
+.contributors-section {
+    background-color: #f9f9f9; /* Light blue background for Contributors section */
+    color: #333; /* Black text for Contributors section */
+    padding: 20px; /* Padding for the section */
+    margin: 20px 0; /* Margin for spacing */
+    border-radius: 8px; /* Rounded corners */
+}
+.contributors-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+}
+
+.contributors-section p {
+    font-size: 1.125rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 1.5em;
+}
+
+.contributors-section ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: center;
+}
+
+.contributors-section ul li {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 10px;
+    padding: 10px;
+    display: inline-block;
+    background-color: #1f6314;
+    color: #fff;
+    border-radius: 6px;
+    transition: transform 0.2s;
+}
+
+.contributors-section ul li:hover {
+    background-color: #181818;
+    transform: scale(1.05); /* Slight enlargement on hover */
 }
 
 
@@ -353,8 +510,42 @@ h1 {
     background-color: #45a049; /* Darker green on hover */
 }
 
+
+
+
+/* new changes*/
+.primary-key {
+    background-color: #75b032; 
+    color: white;
+}
+
+.result-table-container {
+    margin-top: 20px;
+}
+
+.table-container {
+    margin-bottom: 10px;
+}
+
+.result-table th, .result-table td {
+    background-color: #f4f4f4; 
+    color: #333;
+}
+
+
 #customReq::placeholder,
 #relationReq::placeholder {
     color: #888;
     font-style: italic;
+}
+
+.result-table-container .add-relationships-button {
+    margin: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+    background-color: #2660f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    display: block; 
 }
