@@ -21,6 +21,11 @@ def index():
     # Renders the main page
     return render_template('index.html')
 
+@app.route('/about')
+def about():
+    # Route for the About & Contributors page
+    return render_template('about.html')
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     client = OpenAI()
