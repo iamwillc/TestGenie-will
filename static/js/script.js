@@ -10,44 +10,74 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Select the "Revise" button by its ID
     let reviseButton = document.getElementById('reviseButton');
-
-    // Attach a click event listener to the "Revise" button
     reviseButton.addEventListener('click', function() {
         sendCustomizationRequest();
     });
 
-
     let closePopupButton = document.getElementById('closePopup');
     if (closePopupButton) {
-      closePopupButton.addEventListener('click', function() {
-        let customizePopup = document.getElementById('customizePopup');
-        if (customizePopup) {
-          customizePopup.style.display = 'none';
-        }
-      });
+        closePopupButton.addEventListener('click', function() {
+            let customizePopup = document.getElementById('customizePopup');
+            if (customizePopup) {
+                customizePopup.style.display = 'none';
+            }
+        });
     }
 
     document.getElementById('closeRelationPopup').addEventListener('click', closeAddRelationPopup);
 
-
     document.getElementById('applyRelationButton').addEventListener('click', function() {
-
         sendRelationshipRequest();
     });
+
+    // Export Button: Attach event listener for export
+    let exportButton = document.getElementById('exportButton');
+    if (exportButton) {
+        exportButton.addEventListener('click', function() {
+            exportResults();  // Call the export function
+        });
+    }
 });
 
-
-
 function exportResults() {
-    // Implement this function
+    console.log('Export button clicked');  // Debugging line
+    
+    let tableData = readTableData();  // Ensure table data is collected properly
+    console.log('Table Data: ', tableData);  // Log table data for debugging
 
-    // this function will return data in all parent tables
-    let tableData = readTableData(tableId);
-
-    // you should be able to get result table data by hacking into this object 'resultTableContainer' 
-    // addResultTable(data) adds the result table for display, and could be helpful
-
-    // to connect this request to GPT, refering to sendCustomizationRequest() and sendRelationshipRequest()
+    fetch('/analyze', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            input: '',
+            tables: tableData,
+            context: 'export'
+        }),
+    })
+    .then(response => {
+        // Ensure we have a proper response from the backend
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+        return response.blob();  // Convert response to a blob for download
+    })
+    .then(blob => {
+        console.log('Blob received: ', blob);  // Check if blob is received
+        
+        // Create a link element to initiate download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'exported_data.csv';  // Name of the file
+        document.body.appendChild(a);  // Append link to body
+        a.click();  // Trigger download
+        a.remove();  // Clean up
+    })
+    .catch(error => {
+        console.error('Error during fetch or download: ', error);  // Log any errors
+    });
 }
 
 function resetTable(tableId) {
