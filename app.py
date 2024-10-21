@@ -107,8 +107,8 @@ def handle_openai_request(user_input, table, context):
         },
     ]
 
-    completion = client.chat.completions.create(
-        model="chatgpt-4o-latest",  
+    completion = client.chat_completions.create(
+        model="gpt-4",
         messages=messages,
     )
 

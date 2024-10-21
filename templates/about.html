@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TestGenie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif; /* Default font */
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #ffffff; /* Header background color */
+            color: rgb(46, 128, 68); /* Header text color */
+            padding: 10px 20px; /* Padding for header */
+            text-align: center; /* Center header text */
+        }h2 {
+        color: #333; /* Darker text color for the heading */
+        margin-bottom: 15px; /* Space below the heading */
+    }
+
+    p {
+        color: #555; /* Slightly lighter text color for the paragraph */
+        margin-bottom: 20px; /* Space below the paragraph */
+    }
+
+    .contributor-list {
+        display: flex; /* Flexbox for alignment */
+        flex-direction: column; /* Stack contributors vertically */
+    }
+
+    .contributor {
+        background-color: #ffffff; /* White background for each contributor */
+        margin: 10px 0; /* Space between contributor boxes */
+        padding: 15px; /* Padding inside each contributor box */
+        border-radius: 5px; /* Rounded corners for contributor boxes */
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for contributor boxes */
+    }
+
+    .contributor h3 {
+        color: #007bff; /* Blue color for contributor names */
+        margin: 0; /* Remove default margin */
+    }
+
+    .contributor p {
+        color: #666; /* Grey color for contribution details */
+        margin-top: 5px; /* Space above contribution details */
+    }
+         
+    </style>
+</head>
+<body>
+
+    <!-- Header with Title -->
+    <header>
+        <h1>TestGenie</h1>
+        <div class="top-right-links">  <a href="{{ url_for('home') }}" class="home-link">Home</a> 
+        </div>
+    </header>
+      
+    <!-- About Section -->
+    <section id="about-section" class="about-section">
+        <h2>About TestGenie</h2>
+        <p> 
+            🌟 <strong>Welcome to TestGenie</strong> 🌟
+        </p>
+        <p>
+            Your ultimate solution for effortless generation of mock tables and results for unit and integration tests!
+        </p>
+        <p>
+            Harnessing the power of cutting-edge <strong>Large Language Models (LLMs)</strong>, TestGenie transforms your testing experience by allowing you to create and manipulate complex datasets through simple, natural language commands. 🛠️✨
+        </p>
+        <p>
+            Imagine telling your testing tool exactly what you need in plain English and watching it conjure up the perfect tables and results in an instant! 🎩📊
+        </p>
+        <p>
+            Designed to streamline your development workflow, TestGenie reduces the time and effort required for test data preparation, enabling you to focus on what truly matters — <strong>building and perfecting your software</strong>. 💻❤️
+        </p>
+        <p>
+            Whether you're a seasoned developer or just starting out, TestGenie is your magical assistant, making test generation not only easier but also more intuitive and enjoyable. 🎉🤖
+        </p>
+        <p>
+            Embrace the future of testing with <strong>TestGenie</strong>, where your words create your tests! 🚀🔮
+        </p>
+    </section>
+
+    <!-- Contributors Section -->
+    <section id="contributors-section" class="contributors-section">
+        <h2>Contributors</h2>
+        <p>This project has been brought to life by a dedicated team of developers and data enthusiasts who aim to streamline data manipulation.</p>
+        <ul>
+            <li><strong>Zhouyayan Li</strong></li>
+            <li><strong>William Chen</strong></li>
+            <li><strong>Arash Ghaffar</strong></li>
+            <li><strong>Mohammadreza Moeini</strong></li>
+            <li><strong>Mansi Mohan Sharma</strong></li>
+        </ul>
+       
+    </section>
+
+</body>
+</html>
