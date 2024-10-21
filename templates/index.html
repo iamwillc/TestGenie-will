@@ -7,13 +7,25 @@
 
 </head>
 <body>
-    <h1>TestGenie</h1>
+    
+    <header>
+        <div class="title-container">
+            <h1>TestGenie</h1>
+        </div>
+
+        <div class="top-right-links">
+            <!-- These links will lead to the about.html page -->
+            <a href="{{ url_for('about') }}#about-section">About</a>
+            <a href="{{ url_for('home') }}">Start Page</a>
+
+        </div>
+    </header>
     <div id="mainContainer"></div> 
 
     <!-- Popup for customization -->
     <div id="customizePopup" class="popup">
         <div class="popup-content">
-            <textarea id="customReq" rows="4" cols="50"></textarea>
+            <textarea id="customReq" rows="4" cols="50" placeholder="Describe your requirements in natural language"></textarea>
             <button id="closePopup" class="close-popup-button">X</button>
             <button id="reviseButton">Revise</button>
         </div>
@@ -22,7 +34,7 @@
     <!-- Popup for adding relationships -->
     <div id="addRelationPopup" class="popup" style="display: none;">
         <div class="popup-content">
-            <textarea id="relationReq" rows="4" cols="50"></textarea>
+            <textarea id="relationReq" rows="4" cols="50" placeholder="Describe your requirements in natural language"></textarea>
             <button id="closeRelationPopup" class="close-popup-button">X</button>
             <button id="applyRelationButton">Apply</button>
         </div>
